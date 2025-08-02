@@ -1,0 +1,13 @@
+<!-- layout.component.html -->
+<div class="flex h-screen bg-gray-50">
+
+  <!-- Nosso menu lateral que ficará fixo -->
+  <app-menu></app-menu>
+
+  <!-- Área de conteúdo dinâmico -->
+  <main class="flex-1 p-6 overflow-y-auto">
+    <!-- O Angular vai carregar os componentes da sua rota aqui -->
+    <router-outlet></router-outlet>
+  </main>
+
+</div>
