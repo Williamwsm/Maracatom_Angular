@@ -1,4 +1,4 @@
-<div class="p-6 bg-gray-100 min-h-screen font-sans">
+<div class="p-6 bg-gray-50 min-h-screen font-sans">
 
   <!-- Cabeçalho da Página -->
   <header class="flex justify-between items-center mb-6">
@@ -6,85 +6,166 @@
       <h1 class="text-2xl font-bold text-gray-800">Relatórios</h1>
       <p class="text-sm text-gray-500">Análise histórica do sistema</p>
     </div>
+    <div>
+      <button (click)="loadReportData('7dias')" [ngClass]="{'bg-gray-800 text-white': activePeriod === '7dias', 'bg-white text-gray-700': activePeriod !== '7dias'}" class="px-3 py-1.5 text-sm font-medium rounded-md mr-2 border border-gray-300">7 Dias</button>
+      <button (click)="loadReportData('Mensal')" [ngClass]="{'bg-gray-800 text-white': activePeriod === 'Mensal', 'bg-white text-gray-700': activePeriod !== 'Mensal'}" class="px-3 py-1.5 text-sm font-medium rounded-md border border-gray-300">Mensal</button>
+    </div>
   </header>
 
-  <!-- Cards de Resumo -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-    <div class="bg-white p-6 rounded-lg border border-gray-200">
-      <p class="text-sm text-gray-500 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-        Consumo Total
-      </p>
-      <p class="text-3xl font-bold text-gray-800 mt-2">2.650 kWh</p>
-      <p class="text-xs text-green-600 font-semibold mt-1">+6% vs mês anterior</p>
-    </div>
-    <div class="bg-white p-6 rounded-lg border border-gray-200">
-      <p class="text-sm text-gray-500 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-        Economia
-      </p>
-      <p class="text-3xl font-bold text-gray-800 mt-2">R$ 580</p>
-      <p class="text-xs text-green-600 font-semibold mt-1">+11% vs mês anterior</p>
-    </div>
+  <!-- Indicador de Carregamento -->
+  <div *ngIf="isLoading" class="text-center py-20">
+    <p class="text-gray-500">A carregar dados do relatório...</p>
   </div>
 
-  <!-- Container dos Gráficos -->
-  <div class="bg-white p-6 rounded-lg border border-gray-200">
-    <!-- Filtros de Período e Gráfico -->
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <button (click)="activePeriod = '7dias'" [ngClass]="{'bg-gray-800 text-white': activePeriod === '7dias', 'bg-gray-200 text-gray-700': activePeriod !== '7dias'}" class="px-3 py-1 text-sm font-medium rounded-md mr-2">7 Dias</button>
-        <button (click)="activePeriod = 'Mensal'" [ngClass]="{'bg-gray-800 text-white': activePeriod === 'Mensal', 'bg-gray-200 text-gray-700': activePeriod !== 'Mensal'}" class="px-3 py-1 text-sm font-medium rounded-md">Mensal</button>
+  <!-- Conteúdo Principal -->
+  <div *ngIf="!isLoading && reportPackage">
+    <!-- Cards de Resumo do Cabeçalho -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <!-- Consumo Total -->
+      <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <p class="text-sm text-gray-500">Consumo Total</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ reportPackage.header.consumoTotal | number:'1.0-0' }} kWh</p>
+        <p class="text-xs text-green-600 font-semibold mt-1">+6% vs mês anterior</p>
       </div>
-      <div class="flex border border-gray-300 rounded-md">
-        <button (click)="selectChart('Consumo')" [ngClass]="{'bg-gray-200': activeChart === 'Consumo'}" class="px-4 py-1 text-sm text-gray-700 rounded-l-md">Consumo</button>
-        <button (click)="selectChart('Temperatura')" [ngClass]="{'bg-gray-200': activeChart === 'Temperatura'}" class="px-4 py-1 text-sm text-gray-700 border-l border-r border-gray-300">Temperatura</button>
-        <button (click)="selectChart('Custos')" [ngClass]="{'bg-gray-200': activeChart === 'Custos'}" class="px-4 py-1 text-sm text-gray-700 rounded-r-md">Custos</button>
+      <!-- Economia -->
+      <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <p class="text-sm text-gray-500">Economia</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ reportPackage.header.economiaTotal | currency:'BRL' }}</p>
+        <p class="text-xs text-green-600 font-semibold mt-1">+11% vs mês anterior</p>
+      </div>
+      <!-- Temperatura Média -->
+      <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <p class="text-sm text-gray-500">Temperatura Média</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ reportPackage.header.temperaturaMedia | number:'1.1-1' }}°C</p>
+        <p class="text-xs text-gray-400 mt-1">Faixa ideal: 22-25°C</p>
+      </div>
+      <!-- Eficiência Média -->
+      <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <p class="text-sm text-gray-500">Eficiência Média</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ reportPackage.header.eficienciaMedia | number:'1.0-0' }}%</p>
+        <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+            <div class="bg-teal-500 h-1.5 rounded-full" [style.width]="reportPackage.header.eficienciaMedia + '%'"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Container das Tabelas -->
+    <div class="bg-white rounded-lg border border-gray-200">
+      <!-- Abas de Navegação -->
+      <div class="flex border-b border-gray-200">
+        <button (click)="selectTab('Consumo')" [ngClass]="{'border-teal-500 text-teal-600': activeTab === 'Consumo', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'Consumo'}" class="px-4 py-3 text-sm font-medium border-b-2">Consumo</button>
+        <button (click)="selectTab('Temperatura')" [ngClass]="{'border-teal-500 text-teal-600': activeTab === 'Temperatura', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'Temperatura'}" class="px-4 py-3 text-sm font-medium border-b-2">Temperatura</button>
+        <button (click)="selectTab('Custos')" [ngClass]="{'border-teal-500 text-teal-600': activeTab === 'Custos', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'Custos'}" class="px-4 py-3 text-sm font-medium border-b-2">Custos</button>
+      </div>
+
+      <div class="p-6">
+        <div [ngSwitch]="activeTab">
+
+          <!-- Tabela de Consumo -->
+          <div *ngSwitchCase="'Consumo'">
+            <h3 class="font-bold text-lg mb-1">Consumo Energético Diário</h3>
+            <p class="text-sm text-gray-500 mb-4">{{ chartTitle }}</p>
+            <table class="w-full text-left text-sm">
+              <thead>
+                <tr class="border-b text-gray-500">
+                  <th class="py-2">Data</th><th>Consumo (kWh)</th><th>Eficiência</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let day of reportPackage.dailyData" class="border-b">
+                  <td class="py-3">{{ day.date }}</td>
+                  <td>
+                    <div class="flex items-center">
+                      <span>{{ day.consumo }}</span>
+                      <div class="w-20 h-1.5 bg-gray-200 rounded-full ml-4"><div class="bg-blue-500 h-1.5 rounded-full" [style.width]="(day.consumo / reportPackage.summary.maiorConsumo.value * 100) + '%'"></div></div>
+                    </div>
+                  </td>
+                  <td>{{ day.eficiencia }}%</td>
+                  <td>
+                    <span class="px-2 py-0.5 text-xs rounded-full"
+                          [ngClass]="{
+                            'bg-green-100 text-green-700': day.statusConsumo === 'Excelente',
+                            'bg-yellow-100 text-yellow-700': day.statusConsumo === 'Bom',
+                            'bg-red-100 text-red-700': day.statusConsumo === 'Atenção'
+                          }">{{ day.statusConsumo }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tabela de Temperatura -->
+          <div *ngSwitchCase="'Temperatura'">
+            <h3 class="font-bold text-lg mb-1">Monitoramento Térmico</h3>
+            <p class="text-sm text-gray-500 mb-4">{{ chartTitle }}</p>
+             <table class="w-full text-left text-sm">
+              <thead><tr class="border-b text-gray-500"><th class="py-2">Data</th><th>Temperatura</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let day of reportPackage.dailyData" class="border-b">
+                  <td class="py-3">{{ day.date }}</td>
+                  <td>
+                     <div class="flex items-center">
+                      <span>{{ day.temperatura }}°C</span>
+                      <div class="w-20 h-1.5 bg-gray-200 rounded-full ml-4"><div class="h-1.5 rounded-full" [style.width]="((day.temperatura - 22) / 4 * 100) + '%'" [ngClass]="{'bg-green-500': day.statusTemperatura === 'Ideal', 'bg-red-500': day.statusTemperatura === 'Alto'}"></div></div>
+                    </div>
+                  </td>
+                  <td><span class="px-2 py-0.5 text-xs rounded-full" [ngClass]="{'bg-green-100 text-green-700': day.statusTemperatura === 'Ideal', 'bg-red-100 text-red-700': day.statusTemperatura === 'Alto'}">{{ day.statusTemperatura }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tabela de Custos -->
+          <div *ngSwitchCase="'Custos'">
+            <h3 class="font-bold text-lg mb-1">Análise de Custos</h3>
+            <p class="text-sm text-gray-500 mb-4">{{ chartTitle }}</p>
+            <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+              <div class="bg-blue-50 p-4 rounded-lg"><p class="text-sm text-blue-800">Custo Total</p><p class="font-bold text-xl">{{ reportPackage.header.consumoTotal * 0.25 | currency:'BRL' }}</p></div>
+              <div class="bg-green-50 p-4 rounded-lg"><p class="text-sm text-green-800">Economia Estimada</p><p class="font-bold text-xl">{{ reportPackage.header.economiaTotal | currency:'BRL' }}</p></div>
+              <div class="bg-yellow-50 p-4 rounded-lg"><p class="text-sm text-yellow-800">Custo Médio/Dia</p><p class="font-bold text-xl">{{ (reportPackage.header.consumoTotal * 0.25) / reportPackage.dailyData.length | currency:'BRL' }}</p></div>
+            </div>
+             <table class="w-full text-left text-sm">
+              <thead><tr class="border-b text-gray-500"><th class="py-2">Data</th><th>Custo Diário</th><th>Consumo (kWh)</th><th>Custo/kWh</th><th>Comparação</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let day of reportPackage.dailyData" class="border-b">
+                  <td class="py-3">{{ day.date }}</td>
+                  <td>
+                    <div class="flex items-center">
+                      <span>{{ day.custoDiario | currency:'BRL' }}</span>
+                      <div class="w-20 h-1.5 bg-gray-200 rounded-full ml-4"><div class="h-1.5 rounded-full" [style.width]="(day.custoDiario / 110 * 100) + '%'" [ngClass]="{'bg-red-500': day.comparacaoCustos === 'Alto', 'bg-green-500': day.comparacaoCustos !== 'Alto'}"></div></div>
+                    </div>
+                  </td>
+                  <td>{{ day.consumo }} kWh</td>
+                  <td>{{ day.custoKwh | currency:'BRL' }}</td>
+                  <td><span class="px-2 py-0.5 text-xs rounded-full" [ngClass]="{'bg-red-100 text-red-700': day.comparacaoCustos === 'Alto', 'bg-gray-100 text-gray-700': day.comparacaoCustos !== 'Alto'}">{{ day.comparacaoCustos }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Seção do Gráfico -->
-    <div>
-      <h3 class="font-bold text-lg mb-1">
-        <span *ngIf="activeChart === 'Consumo'">Consumo Energético</span>
-        <span *ngIf="activeChart === 'Temperatura'">Temperatura Média</span>
-        <span *ngIf="activeChart === 'Custos'">Custos vs Economia</span>
-      </h3>
-      <p class="text-sm text-gray-500 mb-4">Últimos 7 dias</p>
-
-      <div [ngSwitch]="activeChart" class="h-[300px] w-full">
-
-        <!-- Gráfico de Consumo (Área SVG) -->
-        <svg *ngSwitchCase="'Consumo'" viewBox="0 0 700 300" class="w-full h-full overflow-visible">
-          <path [attr.d]="consumoPath.area" class="fill-blue-500/20" />
-          <path [attr.d]="consumoPath.line" class="fill-none stroke-blue-500" stroke-width="2" />
-          <g *ngFor="let item of consumoData; let i = index">
-            <text [attr.x]="(i / (consumoData.length - 1)) * 700" y="300" dy="15" text-anchor="middle" class="text-xs fill-gray-600">{{ item.name }}</text>
-          </g>
-        </svg>
-
-        <!-- Gráfico de Temperatura (Linha SVG) -->
-        <svg *ngSwitchCase="'Temperatura'" viewBox="0 0 700 300" class="w-full h-full overflow-visible">
-          <path [attr.d]="temperaturaPath" class="fill-none stroke-red-500" stroke-width="2" />
-          <g *ngFor="let item of temperaturaData; let i = index">
-            <text [attr.x]="(i / (temperaturaData.length - 1)) * 700" y="300" dy="15" text-anchor="middle" class="text-xs fill-gray-600">{{ item.name }}</text>
-          </g>
-        </svg>
-
-        <!-- Gráfico de Custos (Barras SVG) -->
-        <svg *ngSwitchCase="'Custos'" viewBox="0 0 700 300" class="w-full h-full overflow-visible">
-          <g *ngFor="let item of custosData; let i = index"
-             [attr.transform]="'translate(' + (i * 100) + ', 0)'">
-            <rect [attr.y]="300 - (item.value / custosMaxValue * 280)"
-                  [attr.height]="item.value / custosMaxValue * 280"
-                  x="25"
-                  width="50"
-                  class="fill-red-500" />
-            <text x="50" y="300" dy="15" text-anchor="middle" class="text-xs fill-gray-600">{{ item.name }}</text>
-          </g>
-        </svg>
-
+    <!-- Resumo e Recomendações -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 class="font-bold text-lg mb-4">Resumo do Período</h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span>Maior consumo:</span><span class="font-semibold">{{ reportPackage.summary.maiorConsumo.value }} kWh ({{ reportPackage.summary.maiorConsumo.date }})</span></div>
+          <div class="flex justify-between"><span>Menor consumo:</span><span class="font-semibold">{{ reportPackage.summary.menorConsumo.value }} kWh ({{ reportPackage.summary.menorConsumo.date }})</span></div>
+          <div class="flex justify-between"><span>Temperatura mais alta:</span><span class="font-semibold">{{ reportPackage.summary.temperaturaMaisAlta.value }}°C ({{ reportPackage.summary.temperaturaMaisAlta.date }})</span></div>
+          <div class="flex justify-between"><span>Melhor eficiência:</span><span class="font-semibold">{{ reportPackage.summary.melhorEficiencia.value }}% ({{ reportPackage.summary.melhorEficiencia.date }})</span></div>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 class="font-bold text-lg mb-4">Recomendações</h3>
+        <ul class="space-y-3 text-sm list-disc list-inside text-gray-600">
+          <li>Otimizar horários de pico <span class="font-semibold">Reduzir uso entre 18h-21h</span></li>
+          <li>Manutenção preventiva <span class="font-semibold">Verificar filtros e serpentinas</span></li>
+          <li>Ajuste de temperatura <span class="font-semibold">Manter entre 23-24°C para melhor eficiência</span></li>
+        </ul>
       </div>
     </div>
+
   </div>
 </div>
