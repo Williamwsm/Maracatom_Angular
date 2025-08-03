@@ -1,0 +1,90 @@
+<div class="p-6 bg-gray-100 min-h-screen font-sans">
+
+  <!-- Cabeçalho da Página -->
+  <header class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Relatórios</h1>
+      <p class="text-sm text-gray-500">Análise histórica do sistema</p>
+    </div>
+  </header>
+
+  <!-- Cards de Resumo -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white p-6 rounded-lg border border-gray-200">
+      <p class="text-sm text-gray-500 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+        Consumo Total
+      </p>
+      <p class="text-3xl font-bold text-gray-800 mt-2">2.650 kWh</p>
+      <p class="text-xs text-green-600 font-semibold mt-1">+6% vs mês anterior</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg border border-gray-200">
+      <p class="text-sm text-gray-500 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        Economia
+      </p>
+      <p class="text-3xl font-bold text-gray-800 mt-2">R$ 580</p>
+      <p class="text-xs text-green-600 font-semibold mt-1">+11% vs mês anterior</p>
+    </div>
+  </div>
+
+  <!-- Container dos Gráficos -->
+  <div class="bg-white p-6 rounded-lg border border-gray-200">
+    <!-- Filtros de Período e Gráfico -->
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <button (click)="activePeriod = '7dias'" [ngClass]="{'bg-gray-800 text-white': activePeriod === '7dias', 'bg-gray-200 text-gray-700': activePeriod !== '7dias'}" class="px-3 py-1 text-sm font-medium rounded-md mr-2">7 Dias</button>
+        <button (click)="activePeriod = 'Mensal'" [ngClass]="{'bg-gray-800 text-white': activePeriod === 'Mensal', 'bg-gray-200 text-gray-700': activePeriod !== 'Mensal'}" class="px-3 py-1 text-sm font-medium rounded-md">Mensal</button>
+      </div>
+      <div class="flex border border-gray-300 rounded-md">
+        <button (click)="selectChart('Consumo')" [ngClass]="{'bg-gray-200': activeChart === 'Consumo'}" class="px-4 py-1 text-sm text-gray-700 rounded-l-md">Consumo</button>
+        <button (click)="selectChart('Temperatura')" [ngClass]="{'bg-gray-200': activeChart === 'Temperatura'}" class="px-4 py-1 text-sm text-gray-700 border-l border-r border-gray-300">Temperatura</button>
+        <button (click)="selectChart('Custos')" [ngClass]="{'bg-gray-200': activeChart === 'Custos'}" class="px-4 py-1 text-sm text-gray-700 rounded-r-md">Custos</button>
+      </div>
+    </div>
+
+    <!-- Seção do Gráfico -->
+    <div>
+      <h3 class="font-bold text-lg mb-1">
+        <span *ngIf="activeChart === 'Consumo'">Consumo Energético</span>
+        <span *ngIf="activeChart === 'Temperatura'">Temperatura Média</span>
+        <span *ngIf="activeChart === 'Custos'">Custos vs Economia</span>
+      </h3>
+      <p class="text-sm text-gray-500 mb-4">Últimos 7 dias</p>
+
+      <div [ngSwitch]="activeChart" class="h-[300px] w-full">
+
+        <!-- Gráfico de Consumo (Área SVG) -->
+        <svg *ngSwitchCase="'Consumo'" viewBox="0 0 700 300" class="w-full h-full overflow-visible">
+          <path [attr.d]="consumoPath.area" class="fill-blue-500/20" />
+          <path [attr.d]="consumoPath.line" class="fill-none stroke-blue-500" stroke-width="2" />
+          <g *ngFor="let item of consumoData; let i = index">
+            <text [attr.x]="(i / (consumoData.length - 1)) * 700" y="300" dy="15" text-anchor="middle" class="text-xs fill-gray-600">{{ item.name }}</text>
+          </g>
+        </svg>
+
+        <!-- Gráfico de Temperatura (Linha SVG) -->
+        <svg *ngSwitchCase="'Temperatura'" viewBox="0 0 700 300" class="w-full h-full overflow-visible">
+          <path [attr.d]="temperaturaPath" class="fill-none stroke-red-500" stroke-width="2" />
+          <g *ngFor="let item of temperaturaData; let i = index">
+            <text [attr.x]="(i / (temperaturaData.length - 1)) * 700" y="300" dy="15" text-anchor="middle" class="text-xs fill-gray-600">{{ item.name }}</text>
+          </g>
+        </svg>
+
+        <!-- Gráfico de Custos (Barras SVG) -->
+        <svg *ngSwitchCase="'Custos'" viewBox="0 0 700 300" class="w-full h-full overflow-visible">
+          <g *ngFor="let item of custosData; let i = index"
+             [attr.transform]="'translate(' + (i * 100) + ', 0)'">
+            <rect [attr.y]="300 - (item.value / custosMaxValue * 280)"
+                  [attr.height]="item.value / custosMaxValue * 280"
+                  x="25"
+                  width="50"
+                  class="fill-red-500" />
+            <text x="50" y="300" dy="15" text-anchor="middle" class="text-xs fill-gray-600">{{ item.name }}</text>
+          </g>
+        </svg>
+
+      </div>
+    </div>
+  </div>
+</div>
