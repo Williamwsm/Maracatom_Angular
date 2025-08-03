@@ -1,0 +1,117 @@
+<div class="p-6 bg-gray-100 min-h-screen font-sans">
+
+  <!-- Indicador de Carregamento -->
+  <div *ngIf="isLoading" class="text-center py-20">
+    <p class="text-gray-500">A carregar dados da página inicial...</p>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <div *ngIf="!isLoading && homeData">
+    <!-- Cards de Resumo Rápido -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <!-- Consumo Total -->
+      <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <p class="text-sm text-gray-500">Consumo Total</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ homeData.headerCards.consumoTotal.value | number:'1.0-0' }} kWh</p>
+      </div>
+      <!-- Custo Total -->
+      <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <p class="text-sm text-gray-500">Custo Total</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ homeData.headerCards.custoTotal.value | currency:'BRL' }}</p>
+      </div>
+      <!-- Temperatura Média -->
+      <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <p class="text-sm text-gray-500">Temperatura Média</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ homeData.headerCards.temperaturaMedia.value | number:'1.1-1' }}°C</p>
+        <p class="text-xs text-gray-400 mt-1">Faixa ideal: {{ homeData.headerCards.temperaturaMedia.idealRange }}</p>
+      </div>
+      <!-- Equipamentos -->
+      <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <p class="text-sm text-gray-500">Equipamentos Online</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">
+          {{ homeData.headerCards.equipamentos.online }}/{{ homeData.headerCards.equipamentos.total }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Seção Principal de Análise -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Coluna Esquerda: Resumo Mensal e Análise Semanal -->
+      <div class="lg:col-span-2 bg-white p-6 rounded-lg border border-gray-200">
+        <h2 class="text-lg font-bold text-gray-800">Resumo Mensal - {{ currentMonthYear }}</h2>
+        <p class="text-sm text-gray-500 mb-6">Análise completa do mês</p>
+
+        <!-- Cards de Resumo Mensal -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div class="bg-blue-50 p-3 rounded-lg text-center"><p class="text-sm text-blue-800">Consumo Total</p><p class="font-bold text-lg">{{ homeData.resumoMensal.consumoTotal | number:'1.0-0' }} kWh</p></div>
+          <div class="bg-green-50 p-3 rounded-lg text-center"><p class="text-sm text-green-800">Custo Total</p><p class="font-bold text-lg">{{ homeData.resumoMensal.custoTotal | currency:'BRL' }}</p></div>
+          <div class="bg-purple-50 p-3 rounded-lg text-center"><p class="text-sm text-purple-800">Temp. Média</p><p class="font-bold text-lg">{{ homeData.resumoMensal.temperaturaMedia | number:'1.1-1' }}°C</p></div>
+          <div class="bg-orange-50 p-3 rounded-lg text-center"><p class="text-sm text-orange-800">Eficiência</p><p class="font-bold text-lg">{{ homeData.resumoMensal.eficienciaMedia }}%</p></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-sm text-center">
+            <div><span class="font-semibold">{{ homeData.resumoMensal.diasAltaEficiencia }} dias</span> com alta eficiência >85%</div>
+            <div><span class="font-semibold">{{ homeData.resumoMensal.diasConsumoElevado }} dias</span> com consumo elevado >400kWh</div>
+            <div>Economia vs mês anterior <span class="font-semibold text-green-600">+{{ homeData.resumoMensal.economiaMesAnterior | currency:'BRL' }}</span></div>
+        </div>
+
+        <!-- Tabela de Análise Semanal -->
+        <h3 class="font-bold text-lg mb-1">Análise Semanal do Mês</h3>
+        <p class="text-sm text-gray-500 mb-4">Breakdown detalhado por semana</p>
+        <table class="w-full text-left text-sm">
+          <thead><tr class="border-b text-gray-500"><th class="py-2">Período</th><th>Consumo Total</th><th>Custo</th><th>Temp. Média</th><th>Pico de Consumo</th><th>Performance</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let week of homeData.analiseSemanal" class="border-b">
+              <td class="py-3 font-medium">{{ week.periodo }}</td>
+              <td>{{ week.consumoTotal | number:'1.0-0' }} kWh</td>
+              <td>{{ week.custo | currency:'BRL' }}</td>
+              <td>{{ week.tempMedia | number:'1.1-1' }}°C</td>
+              <td>{{ week.picoConsumo.value }} kWh ({{ week.picoConsumo.date }})</td>
+              <td><span class="px-2 py-0.5 text-xs rounded-full" [ngClass]="{'bg-green-100 text-green-700': week.performance === 'Excelente', 'bg-yellow-100 text-yellow-700': week.performance === 'Bom', 'bg-red-100 text-red-700': week.performance === 'Atenção'}">{{ week.performance }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Coluna Direita: Comparação Anual -->
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h2 class="text-lg font-bold text-gray-800">Comparação Anual</h2>
+        <p class="text-sm text-gray-500 mb-6">{{ currentMonthYear.split(' ')[0] }} vs outros meses</p>
+        <div class="space-y-4">
+          <div *ngFor="let month of homeData.comparacaoAnual" class="flex justify-between items-center text-sm p-3 rounded-md" [ngClass]="{'bg-gray-100 font-bold': month.month === currentMonthAbbr}">
+            <span class="font-medium">{{ month.month }}</span>
+            <span>{{ month.consumo | number:'1.0-0' }} kWh</span>
+            <span class="font-semibold">{{ month.custo | currency:'BRL' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção Inferior: Melhores Dias, Alertas e Projeção -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 class="font-bold text-lg mb-4">Melhores Dias</h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span>Menor consumo:</span><span class="font-semibold">{{ homeData.melhoresDias.menorConsumo.value }} kWh ({{ homeData.melhoresDias.menorConsumo.date }})</span></div>
+          <div class="flex justify-between"><span>Melhor eficiência:</span><span class="font-semibold">{{ homeData.melhoresDias.melhorEficiencia.value }}% ({{ homeData.melhoresDias.melhorEficiencia.date }})</span></div>
+          <div class="flex justify-between"><span>Menor custo:</span><span class="font-semibold">{{ homeData.melhoresDias.menorCusto.value | currency:'BRL' }} ({{ homeData.melhoresDias.menorCusto.date }})</span></div>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 class="font-bold text-lg mb-4">Alertas do Mês</h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span>Picos de consumo:</span><span class="font-semibold text-red-600">{{ homeData.alertasMes.picosConsumo }} ocorrências</span></div>
+          <div class="flex justify-between"><span>Temp. fora do ideal:</span><span class="font-semibold text-red-600">{{ homeData.alertasMes.tempForaIdeal }} dias</span></div>
+          <div class="flex justify-between"><span>Eficiência baixa:</span><span class="font-semibold text-red-600">{{ homeData.alertasMes.eficienciaBaixa }} dias</span></div>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 class="font-bold text-lg mb-4">Projeção Próximo Mês</h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span>Consumo estimado:</span><span class="font-semibold">{{ homeData.projecaoProximoMes.consumoEstimado | number:'1.0-0' }} kWh</span></div>
+          <div class="flex justify-between"><span>Custo estimado:</span><span class="font-semibold">{{ homeData.projecaoProximoMes.custoEstimado | currency:'BRL' }}</span></div>
+          <div class="flex justify-between"><span>Economia prevista:</span><span class="font-semibold text-green-600">{{ homeData.projecaoProximoMes.economiaPrevista | currency:'BRL' }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

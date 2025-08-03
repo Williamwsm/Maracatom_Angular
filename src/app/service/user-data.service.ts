@@ -11,7 +11,6 @@ export interface User {
 export interface Notifications {
   equipamentos: number;
   alertas: number;
-  recomendacoes: number;
   manutencao: number;
   [key: string]: number; // Assinatura de índice para acesso dinâmico
 }
@@ -33,7 +32,6 @@ export class UserDataService {
   private readonly _notifications = new BehaviorSubject<Notifications>({
     equipamentos: 0,
     alertas: 0,
-    recomendacoes: 0,
     manutencao: 0
   });
 

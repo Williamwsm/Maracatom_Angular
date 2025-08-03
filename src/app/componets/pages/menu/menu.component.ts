@@ -34,7 +34,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   // Definição dos itens do menu com suas rotas e chaves de notificação
   monitoringItems: MenuItem[] = [
-    { icon: 'home', label: 'Dashboard', route: '/dashboard' },
+    { icon: 'home', label: 'Home', route: '/home' },
     { icon: 'thermometer', label: 'Equipamentos', route: '/equipamentos', key: 'equipamentos' },
     { icon: 'alert-triangle', label: 'Alertas', route: '/alertas', key: 'alertas' },
     { icon: 'history', label: 'Histórico', route: '/historico' },
