@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
-import { HomeService, HomePageData } from '../../../service/home.service'; // Ajuste o caminho se necessário
+import { HomeService, HomePageData } from '../../../service/home.service';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
