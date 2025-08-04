@@ -30,7 +30,7 @@ export class UserDataService {
 
   private readonly _notifications = new BehaviorSubject<Notifications>({
     equipamentos: 0,
-    alertas: 0,
+    alertas: 1,
   });
 
   // Expomos os dados como Observables (apenas para leitura)
