@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 // Define os tipos para um alerta
 type AlertPriority = 'ALTA' | 'MÉDIA' | 'BAIXA';
-type AlertStatus = 'ATIVO' | 'CRÍTICO' | 'RESOLVIDO';
+export type AlertStatus = 'ATIVO' | 'CRÍTICO' | 'RESOLVIDO' | 'MANUTENÇÃO'; // Novo status adicionado
 
 export interface Alerta {
   id: number;
@@ -20,7 +20,6 @@ export interface Alerta {
 })
 export class AlertaService {
 
-  // Usamos um BehaviorSubject para gerenciar a lista de alertas de forma reativa.
   private readonly _alertas = new BehaviorSubject<Alerta[]>([
     { id: 1, equipmentName: 'AC Auditório', location: 'Auditório', description: 'Equipamento em falha - Temperatura crítica detectada (32.5°C)', priority: 'ALTA', status: 'CRÍTICO', timestamp: 'há 15 min' },
     { id: 2, equipmentName: 'AC Sala 201', location: 'Sala 201', description: 'Consumo energético 85% acima do normal', priority: 'MÉDIA', status: 'ATIVO', timestamp: 'há 1h' },
@@ -28,7 +27,6 @@ export class AlertaService {
     { id: 4, equipmentName: 'AC Biblioteca', location: 'Biblioteca', description: 'Filtro de ar precisa ser trocado', priority: 'BAIXA', status: 'RESOLVIDO', timestamp: 'há 5h' },
   ]);
 
-  // Stream público que os componentes usarão para obter a lista de alertas.
   readonly alertas$: Observable<Alerta[]> = this._alertas.asObservable();
 
   constructor() { }
@@ -44,6 +42,21 @@ export class AlertaService {
     if (alertaIndex > -1) {
       const updatedAlertas = [...currentAlertas];
       updatedAlertas[alertaIndex] = { ...updatedAlertas[alertaIndex], status: 'RESOLVIDO' };
+      this._alertas.next(updatedAlertas);
+    }
+  }
+
+  /**
+   * Envia um alerta para manutenção.
+   * @param alertaId O ID do alerta a ser enviado para manutenção.
+   */
+  sendToMaintenance(alertaId: number): void {
+    const currentAlertas = this._alertas.getValue();
+    const alertaIndex = currentAlertas.findIndex(a => a.id === alertaId);
+
+    if (alertaIndex > -1) {
+      const updatedAlertas = [...currentAlertas];
+      updatedAlertas[alertaIndex] = { ...updatedAlertas[alertaIndex], status: 'MANUTENÇÃO' };
       this._alertas.next(updatedAlertas);
     }
   }

@@ -37,14 +37,12 @@ export class MenuComponent implements OnInit, OnDestroy {
     { icon: 'home', label: 'Home', route: '/home' },
     { icon: 'thermometer', label: 'Equipamentos', route: '/equipamentos', key: 'equipamentos' },
     { icon: 'alert-triangle', label: 'Alertas', route: '/alertas', key: 'alertas' },
-    { icon: 'history', label: 'Histórico', route: '/historico' },
     { icon: 'document', label: 'Relatórios', route: '/relatorios' }
   ];
 
   adminItems: MenuItem[] = [
     { icon: 'settings', label: 'Configurações', route: '/configuracoes' },
-    { icon: 'users', label: 'Usuários', route: '/usuarios' },
-    { icon: 'maintenance', label: 'Manutenção', route: '/manutencao', key: 'manutencao' }
+    { icon: 'users', label: 'Usuários', route: '/usuarios' }
   ];
 
   // Injetando o serviço de dados no construtor

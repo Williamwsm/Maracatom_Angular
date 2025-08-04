@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { Alerta, AlertaService } from '../../../service/alertas.service'; 
+import { Alerta, AlertaService, AlertStatus } from '../../../service/alertas.service'; 
 
-type AlertStatusFilter = 'ATIVOS' | 'CRÍTICOS' | 'RESOLVIDOS';
+type AlertStatusFilter = 'ATIVOS' | 'CRÍTICOS' | 'RESOLVIDOS' | 'MANUTENÇÃO';
 
 @Component({
   selector: 'app-alertas',
@@ -28,7 +28,7 @@ export class AlertasComponent implements OnInit, OnDestroy {
     this.alertsSubscription = this.alertaService.alertas$.subscribe(alertas => {
       this.allAlerts = alertas;
       this.hasCriticalAlerts = this.allAlerts.some(a => a.status === 'CRÍTICO');
-      this.setFilter('ATIVOS'); // Filtro inicial
+      this.setFilter(this.activeFilter); // Reaplica o filtro atual com os novos dados
     });
   }
 
@@ -48,6 +48,9 @@ export class AlertasComponent implements OnInit, OnDestroy {
       case 'RESOLVIDOS':
         this.filteredAlerts = this.allAlerts.filter(a => a.status === 'RESOLVIDO');
         break;
+      case 'MANUTENÇÃO':
+        this.filteredAlerts = this.allAlerts.filter(a => a.status === 'MANUTENÇÃO');
+        break;
     }
   }
 
@@ -59,11 +62,17 @@ export class AlertasComponent implements OnInit, OnDestroy {
         return this.allAlerts.filter(a => a.status === 'CRÍTICO').length;
       case 'RESOLVIDOS':
         return this.allAlerts.filter(a => a.status === 'RESOLVIDO').length;
+      case 'MANUTENÇÃO':
+        return this.allAlerts.filter(a => a.status === 'MANUTENÇÃO').length;
     }
   }
 
   resolve(alerta: Alerta): void {
     this.alertaService.resolveAlerta(alerta.id);
+  }
+
+  sendToMaintenance(alerta: Alerta): void {
+    this.alertaService.sendToMaintenance(alerta.id);
   }
 
   delete(alerta: Alerta): void {
